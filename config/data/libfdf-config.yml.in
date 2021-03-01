@@ -1,0 +1,35 @@
+%YAML 1.2
+---
+timestamp: "@fdf_timestamp@"
+
+info:
+    version: "@PACKAGE_VERSION@"
+
+target:
+    cpu: "@target_cpu@"
+    vendor: "@target_vendor@"
+    os: "@target_os@"
+
+compilers:
+    CPP: "@CPP@"
+    CPPFLAGS: "@CPPFLAGS@"
+    CC: "@CC@"
+    CFLAGS: "@CFLAGS@"
+    FC: "@FC@"
+    FCFLAGS: "@FCFLAGS@"
+    LDFLAGS: "@LDFLAGS@"
+    LIBS: "@LIBS@"
+
+defaults:
+    debug_enable: "@fdf_debug_enable_def@"
+
+options:
+    enable_debug: "@enable_debug@"
+
+triggers:
+    debug_enable: "@fdf_debug_enable@"
+
+inits:
+    debug: "@fdf_debug_type@"
+
+...

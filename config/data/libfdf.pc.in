@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libfdf
+Description: Flexible Data Format Input/Output Library
+Version: @VERSION@
+Libs: -L${libdir} -lfdf
+Cflags: -I${includedir}

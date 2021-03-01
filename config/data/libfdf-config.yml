@@ -1,0 +1,35 @@
+%YAML 1.2
+---
+timestamp: "20210209T212927+0100"
+
+info:
+    version: "0.2.2"
+
+target:
+    cpu: "x86_64"
+    vendor: "pc"
+    os: "linux-gnu"
+
+compilers:
+    CPP: "icc -E"
+    CPPFLAGS: ""
+    CC: "icc"
+    CFLAGS: "-O2"
+    FC: "ifort"
+    FCFLAGS: "-O2"
+    LDFLAGS: ""
+    LIBS: ""
+
+defaults:
+    debug_enable: "no"
+
+options:
+    enable_debug: ""
+
+triggers:
+    debug_enable: "no"
+
+inits:
+    debug: "def"
+
+...

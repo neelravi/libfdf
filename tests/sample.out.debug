@@ -1,0 +1,470 @@
+ *** FDF Memory Structure Summary: ************
+ Line:fdf-debug 2
+ Ntokens:           2
+   Token:fdf-debug(l)
+   Token:2(i)
+ Line:new-style                               # Just a label by itself
+ Ntokens:           1
+   Token:new-style(l)
+ Line:NumberOfAtoms              3            # Set an integer parameter
+ Ntokens:           2
+   Token:NumberOfAtoms(l)
+   Token:3(i)
+ Line:MeshCutoff                 500.0 eV     # Example of physical magnitude
+ Ntokens:           3
+   Token:MeshCutoff(l)
+   Token:500.0(r)
+   Token:eV(n)
+ Line:factor-Value  3.14e10                   # Alternate label appearance
+ Ntokens:           2
+   Token:factor-Value(l)
+   Token:3.14e10(r)
+ Line:nameOFfile  'Some file'                 # A multiword string
+ Ntokens:           2
+   Token:nameOFfile(l)
+   Token:Some file(n)
+ Line:phonon-energy 344  cm**-1               # More units
+ Ntokens:           3
+   Token:phonon-energy(l)
+   Token:344(i)
+   Token:cm**-1(n)
+ Line:%block AtomicCoordinatesAndAtomicSpecies        # Beginning of Block
+ Ntokens:           2
+   Token:%block(b)
+   Token:AtomicCoordinatesAndAtomicSpecies(l)
+ Line:
+  0.000000  0.000000  0.000000  1                # Coordinates, species index
+ Ntokens:           4
+   Token:0.000000(r)
+   Token:0.000000(r)
+   Token:0.000000(r)
+   Token:1(i)
+ Line: 1.431000  1.108000  0.000000  2
+ Ntokens:           4
+   Token:1.431000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+   Token:2(i)
+ Line:-1.431000  1.108000  0.000000  2
+ Ntokens:           4
+   Token:-1.431000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+   Token:2(i)
+ Line:%endblock AtomicCoordinatesAndAtomicSpecies
+ Ntokens:           2
+   Token:%endblock(e)
+   Token:AtomicCoordinatesAndAtomicSpecies(l)
+ Line:%block Atomic-Info
+ Ntokens:           2
+   Token:%block(b)
+   Token:Atomic-Info(l)
+ Line: 0.333000  0.000000  0.000000
+ Ntokens:           3
+   Token:0.333000(r)
+   Token:0.000000(r)
+   Token:0.000000(r)
+ Line: 1.500000  1.108000  0.000000
+ Ntokens:           3
+   Token:1.500000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+ Line:-1.431000  1.108000  0.000000
+ Ntokens:           3
+   Token:-1.431000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+ Line:%endblock Atomic-Info
+ Ntokens:           2
+   Token:%endblock(e)
+   Token:Atomic-Info(l)
+ Line:%block Other-Block                                    # Read block
+ Ntokens:           2
+   Token:%block(b)
+   Token:Other-Block(l)
+ Line: Nh   1.500000  1.108000  0.000000
+ Ntokens:           4
+   Token:Nh(n)
+   Token:1.500000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+ Line: Ox   0.333000  0.000000  0.000000
+ Ntokens:           4
+   Token:Ox(n)
+   Token:0.333000(r)
+   Token:0.000000(r)
+   Token:0.000000(r)
+ Line: Pd  -1.431000  1.108000  0.000000
+ Ntokens:           4
+   Token:Pd(n)
+   Token:-1.431000(r)
+   Token:1.108000(r)
+   Token:0.000000(r)
+ Line:%endblock Other-Block
+ Ntokens:           2
+   Token:%endblock(e)
+   Token:Other-Block(l)
+ Line:%block ListBlock
+ Ntokens:           2
+   Token:%block(b)
+   Token:ListBlock(l)
+ Line: List1 [1,2,3 ,5 , 6 ] [-1,-3] [100 -- 10 step 7]
+ Ntokens:           4
+   Token:List1(n)
+   Token:[1,2,3 ,5 , 6 ](a)
+   Token:[-1,-3](a)
+   Token:[100 -- 10 step 7](a)
+ Line: List2 [ 1 to 5 , 4 ] [10 -- 20 step 4 , 3 ]
+ Ntokens:           3
+   Token:List2(n)
+   Token:[ 1 to 5 , 4 ](a)
+   Token:[10 -- 20 step 4 , 3 ](a)
+ Line: List2 [ 1 to 5 , 4 , 2 to 10 , -2 to -20]
+ Ntokens:           2
+   Token:List2(n)
+   Token:[ 1 to 5 , 4 , 2 to 10 , -2 to -20](a)
+ Line:%endblock ListBlock
+ Ntokens:           2
+   Token:%endblock(e)
+   Token:ListBlock(l)
+ Line:MyList [ 2 -- 10 , 11 , 20 ]
+ Ntokens:           2
+   Token:MyList(l)
+   Token:[ 2 -- 10 , 11 , 20 ](a)
+ Line:MyListOne [ 2 ]
+ Ntokens:           2
+   Token:MyListOne(l)
+   Token:[ 2 ](a)
+ Line:MyListR [ 2 : 10 step 1.2 , 11.2 , 20 ]
+ Ntokens:           2
+   Token:MyListR(l)
+   Token:[ 2 : 10 step 1.2 , 11.2 , 20 ](c)
+ Line:MyListROne [ 2. ]
+ Ntokens:           2
+   Token:MyListROne(l)
+   Token:[ 2. ](c)
+ Line:debug   faLSE                           # Case insensitive!!
+ Ntokens:           2
+   Token:debug(l)
+   Token:faLSE(n)
+ Line:ExternalEntry     99
+ Ntokens:           2
+   Token:ExternalEntry(l)
+   Token:99(i)
+ Line:AxisXY   Polar
+ Ntokens:           2
+   Token:AxisXY(l)
+   Token:Polar(n)
+ Line:StatusXY Enabled
+ Ntokens:           2
+   Token:StatusXY(l)
+   Token:Enabled(n)
+ **********************************************
+ PARSER:           5 token(s)
+    Token:|1|
+    Token:|2|
+    Token:|3|
+    Token:|5|
+    Token:|6|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|1|
+    Token:|2|
+    Token:|3|
+    Token:|5|
+    Token:|6|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           2 token(s)
+    Token:|-1|
+    Token:|-3|
+  
+ MORPHOL:           2 token(s)
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           2 token(s)
+    Token:|-1|
+    Token:|-3|
+  
+ MORPHOL:           2 token(s)
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|100|
+    Token:|--|
+    Token:|10|
+    Token:|step|
+    Token:|7|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|100|
+    Token:|--|
+    Token:|10|
+    Token:|step|
+    Token:|7|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+  
+ PARSER:           4 token(s)
+    Token:|1|
+    Token:|to|
+    Token:|5|
+    Token:|4|
+  
+ MORPHOL:           4 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           4 token(s)
+    Token:|1|
+    Token:|to|
+    Token:|5|
+    Token:|4|
+  
+ MORPHOL:           4 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           6 token(s)
+    Token:|10|
+    Token:|--|
+    Token:|20|
+    Token:|step|
+    Token:|4|
+    Token:|3|
+  
+ MORPHOL:           6 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           6 token(s)
+    Token:|10|
+    Token:|--|
+    Token:|20|
+    Token:|step|
+    Token:|4|
+    Token:|3|
+  
+ MORPHOL:           6 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:          10 token(s)
+    Token:|1|
+    Token:|to|
+    Token:|5|
+    Token:|4|
+    Token:|2|
+    Token:|to|
+    Token:|10|
+    Token:|-2|
+    Token:|to|
+    Token:|-20|
+  
+ MORPHOL:          10 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+  
+ PARSER:          10 token(s)
+    Token:|1|
+    Token:|to|
+    Token:|5|
+    Token:|4|
+    Token:|2|
+    Token:|to|
+    Token:|10|
+    Token:|-2|
+    Token:|to|
+    Token:|-20|
+  
+ MORPHOL:          10 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|n|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|2|
+    Token:|--|
+    Token:|10|
+    Token:|11|
+    Token:|20|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|2|
+    Token:|--|
+    Token:|10|
+    Token:|11|
+    Token:|20|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           5 token(s)
+    Token:|2|
+    Token:|--|
+    Token:|10|
+    Token:|11|
+    Token:|20|
+  
+ MORPHOL:           5 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|i|
+    Token:|i|
+  
+ PARSER:           1 token(s)
+    Token:|2|
+  
+ MORPHOL:           1 token(s)
+    Token:|i|
+  
+ PARSER:           1 token(s)
+    Token:|2|
+  
+ MORPHOL:           1 token(s)
+    Token:|i|
+  
+ PARSER:           1 token(s)
+    Token:|2|
+  
+ MORPHOL:           1 token(s)
+    Token:|i|
+  
+ PARSER:           7 token(s)
+    Token:|2|
+    Token:|:|
+    Token:|10|
+    Token:|step|
+    Token:|1.2|
+    Token:|11.2|
+    Token:|20|
+  
+ MORPHOL:           7 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|r|
+    Token:|r|
+    Token:|i|
+  
+ PARSER:           7 token(s)
+    Token:|2|
+    Token:|:|
+    Token:|10|
+    Token:|step|
+    Token:|1.2|
+    Token:|11.2|
+    Token:|20|
+  
+ MORPHOL:           7 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|r|
+    Token:|r|
+    Token:|i|
+  
+ PARSER:           7 token(s)
+    Token:|2|
+    Token:|:|
+    Token:|10|
+    Token:|step|
+    Token:|1.2|
+    Token:|11.2|
+    Token:|20|
+  
+ MORPHOL:           7 token(s)
+    Token:|i|
+    Token:|n|
+    Token:|i|
+    Token:|n|
+    Token:|r|
+    Token:|r|
+    Token:|i|
+  
+ PARSER:           1 token(s)
+    Token:|2.|
+  
+ MORPHOL:           1 token(s)
+    Token:|r|
+  
+ PARSER:           1 token(s)
+    Token:|2.|
+  
+ MORPHOL:           1 token(s)
+    Token:|r|
+  
+ PARSER:           1 token(s)
+    Token:|2.|
+  
+ MORPHOL:           1 token(s)
+    Token:|r|
+  
