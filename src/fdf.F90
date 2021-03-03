@@ -103,6 +103,7 @@ MODULE fdf
   public :: fdf_integer, fdf_single, fdf_double
   public :: fdf_string, fdf_boolean
   public :: fdf_physical, fdf_convfac
+  public :: fdf_load_filename         ! Ravindra
 
   ! Lists
   public :: fdf_islist, fdf_islinteger, fdf_islreal
@@ -152,7 +153,7 @@ MODULE fdf
   public :: fdf_printfdf
 
 ! Finds a label in the FDF herarchy
-  private :: fdf_locate
+  private :: fdf_locate, fdf_load_locate
 
 ! Dump function (for blocks)
   private :: fdf_dump
@@ -458,7 +459,7 @@ CONTAINS
 
 !------------------------------------------------------------------------- BEGIN
 
-      call fdf_read(filein)
+      call fdf_read_custom(filein)
 
 
       if (fdf_output) write(fdf_out,'(a,a,a,i3)') '#FDF module: Opened ', filein,   &
@@ -467,6 +468,261 @@ CONTAINS
       RETURN
 !--------------------------------------------------------------------------- END
     END SUBROUTINE fdf_input
+
+
+!   Read an input file (and include files) and builds memory
+!   structure that will contain the data and will help in searching
+!
+    RECURSIVE SUBROUTINE fdf_read_custom(filein, blocklabel)
+      implicit none
+!--------------------------------------------------------------- Input Variables
+      character(*)               :: filein
+      character(*), optional     :: blocklabel
+
+!--------------------------------------------------------------- Local Variables
+      logical                    :: dump
+      logical, allocatable       :: found(:)
+      character(80)              :: msg
+      character(len=MAX_LENGTH)  :: label, inc_file
+      character(len=MAX_LENGTH*2):: line
+      integer(ip)                :: i, ierr, ntok, ind_less, nlstart
+      type(parsed_line), pointer :: pline
+
+!------------------------------------------------------------------------- BEGIN
+!     Open reading input file
+      call fdf_open(filein)
+
+!     Read each input data line
+      if (PRESENT(blocklabel)) then
+        label = blocklabel
+      else
+        label = ' '
+      endif
+      do while (fdf_readline(line))
+
+!       Check if valid data (tokens, non-blank)
+        pline => digest(line)
+        ntok = ntokens(pline)
+        if (ntok .ne. 0) then
+
+!         Find different special cases in the input files
+!         (%block, %endblock, %include, Label1 Label2 ... < Filename)
+
+!         %block directive
+          ind_less = search('<', pline)
+          if (search('%block', pline) .eq. 1) then
+
+!           No label found in %block directive
+            if (ntok .eq. 1) then
+              write(msg,*) '%block label not found in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)
+            endif
+
+!           %block Label < Filename [ %dump ]
+            if (ind_less .eq. 3) then
+
+              if (ntok .ge. 4) then
+!               Test if %dump is present
+                if (search('%dump', pline) .eq. 5) then
+                  dump = .TRUE.
+                else
+                  dump = .FALSE.
+                endif
+
+!               Add begin, body and end sections of block
+                label = tokens(pline, 2)
+                inc_file  = tokens(pline, 4)
+                call destroy(pline)
+                line = '%block ' // trim(label) // ' ' // trim(inc_file)
+                pline => digest(line)
+                call setmorphol(1, 'b', pline)
+                call setmorphol(2, 'l', pline)
+                call fdf_addtoken(line, pline)
+                nullify(pline) ! it is stored in line
+
+                nlstart = file_in%nlines
+
+                call fdf_read(inc_file, label)
+
+!               Warn if block 'label' is empty
+                if ((nlstart - file_in%nlines) .eq. 0) then
+                  write(msg,*) 'FDF module: fdf_read: block ',          &
+                               TRIM(label), ' is empty...'
+                  call warn(msg)
+                endif
+
+                line = '%endblock ' // label
+                pline => digest(line)
+                call setmorphol(1, 'e', pline)
+                call setmorphol(2, 'l', pline)
+                call fdf_addtoken(line, pline)
+                nullify(pline) ! it is stored in line
+
+!               Dump included file to fileout
+                if (dump) call fdf_dump(label)
+                label = ' '
+
+!             Filename not found in %block directive
+              else
+                write(msg,*) '%block filename not found in ', TRIM(filein)
+                call die('FDF module: fdf_read', msg,                   &
+                         THIS_FILE, __LINE__, fdf_err)
+              endif
+
+!           %block Label
+            elseif (ind_less .eq. -1) then
+              label = tokens(pline, 2)
+              call setmorphol(1, 'b', pline)
+              call setmorphol(2, 'l', pline)
+              call fdf_addtoken(line, pline)
+              nullify(pline) ! it is stored in line
+              nlstart = file_in%nlines
+
+!           Bad format in %block directive
+            else
+              write(msg,*) 'Bad ''<'' %block format in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)
+            endif
+
+!         %endblock directive
+          elseif (search('%endblock', pline) .eq. 1) then
+!           Check if %block exists before %endblock
+            if (label .eq. ' ') then
+              write(msg,*) 'Bad %endblock found in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)
+            else
+!             Warn if block 'label' is empty
+              if ((nlstart - file_in%nlines) .eq. 0) then
+                write(msg,*) 'FDF module: fdf_read: block ',            &
+                             TRIM(label), ' is empty...'
+                call warn(msg)
+              endif
+
+              call destroy(pline)
+              line = '%endblock ' // label
+              pline => digest(line)
+              call setmorphol(1, 'e', pline)
+              call setmorphol(2, 'l', pline)
+              call fdf_addtoken(line, pline)
+              nullify(pline) ! it is stored in line
+              label = ' '
+            endif
+
+!         %include Filename directive
+          elseif (search('%include', pline) .eq. 1) then
+!           Check if include filename is specified
+            if (ntok .eq. 1) then
+              write(msg,*) 'Filename on %include not found in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)
+            else
+              inc_file = tokens(pline, 2)
+              call fdf_read(inc_file)
+            endif
+
+            ! Clean pline (we simply insert the next file)
+            call destroy(pline)
+
+! !         %load Filename directive
+!           elseif (search('%load', pline) .eq. 1) then
+! !           Check if load filename is specified
+!             if (ntok .eq. 1) then
+!               write(msg,*) 'Filename on %load not found in ', TRIM(filein)
+!               call die('FDF module: fdf_read_custom', msg,                     &
+!                        THIS_FILE, __LINE__, fdf_err)
+!             else
+!               label = tokens(pline, 2)              
+!               inc_file = tokens(pline, 3)
+!               !call fdf_read(inc_file)
+!               line = '%load ' // trim(label) // ' ' // trim(inc_file)
+!               pline => digest(line)
+!               call setmorphol(1, 'b', pline)
+!               call setmorphol(2, 'l', pline)
+!               call setmorphol(3, 'l', pline)              
+!               call fdf_addtoken(line, pline)
+!               nullify(pline) ! it is stored in line
+!             endif             
+! ! Clean pline (we simply insert the next file)
+!             call destroy(pline)
+           
+
+!         Label1 Label2 ... < Filename directive
+          elseif (ind_less .ne. -1) then
+!           Check if '<' is in a valid position
+            if (ind_less .eq. 1) then
+              write(msg,*) 'Bad ''<'' found in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)
+
+!           Check if '<' filename is specified
+            elseif (ind_less .eq. ntok) then
+              write(msg,*) 'Filename not found after ''<'' in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                       THIS_FILE, __LINE__, fdf_err)        
+
+            else
+!             Search label(s) in Filename
+              inc_file = tokens(pline, ind_less+1)
+              ALLOCATE(found(ind_less-1), stat=ierr)
+              if (ierr .ne. 0) then
+                call die('FDF module: fdf_read', 'Error allocating found', &
+                         THIS_FILE, __LINE__, fdf_err, rc=ierr)
+              endif
+
+
+!             If label(s) not found in such Filename throw an error
+
+
+              found = .FALSE.
+              if (.not. fdf_readlabel(ind_less-1, pline,                &
+                                      inc_file, found)) then
+                 i = 1
+                 do while ((i .le. ind_less-1) .and. (found(i)))
+                    i = i + 1
+                 enddo
+                 label = tokens(pline, i)
+                 write(msg,*) 'Label ', TRIM(label),                     &
+                             ' not found in ', TRIM(inc_file)
+                 call die('FDF module: fdf_read', msg,                   &
+                         THIS_FILE, __LINE__, fdf_err)
+              endif
+
+              call destroy(pline)
+              DEALLOCATE(found)
+            endif
+            
+
+!         Add remaining kind of tokens to dynamic list as labels
+          else
+            if (label .eq. ' ') call setmorphol(1, 'l', pline)
+            call fdf_addtoken(line, pline)
+            nullify(pline) ! it is stored in line
+          endif
+        else
+!         Destroy parsed_line structure if no elements
+          call destroy(pline)
+        endif
+      enddo
+
+!     Close one level of input file
+      if ((.not. PRESENT(blocklabel)) .and. (label .ne. ' ')) then
+        write(msg,*) '%endblock ', TRIM(label),                         &
+                     ' not found in ', TRIM(filein)
+        call die('FDF module: fdf_read', msg, THIS_FILE, __LINE__, fdf_err)
+      endif
+      call fdf_close()
+
+      RETURN
+!--------------------------------------------------------------------------- END
+    END SUBROUTINE fdf_read_custom
+
+
+
+
+
 
 !   Read an input file (and include files) and builds memory
 !   structure that will contain the data and will help in searching
@@ -2016,6 +2272,59 @@ CONTAINS
     END FUNCTION fdf_string
 
 !
+!   Returns a string containing the filename appearing after the label , or the default
+!   string if label is not found in the fdf file.
+!   Optionally can return a pointer to the line found.
+!
+    FUNCTION fdf_load_filename(label, default, line)
+      implicit none
+!--------------------------------------------------------------- Input Variables
+      character(*)                        :: label
+      character(*)                        :: default
+
+!-------------------------------------------------------------- Output Variables
+      character(80)                       :: fdf_load_filename
+      type(line_dlist), pointer, optional :: line
+
+!--------------------------------------------------------------- Local Variables
+      type(line_dlist), pointer           :: mark
+
+!------------------------------------------------------------------------- BEGIN
+!     Prevents using FDF routines without initialize
+      if (.not. fdf_started) then
+        call die('FDF module: fdf_load_filename', 'FDF subsystem not initialized', &
+                 THIS_FILE, __LINE__, fdf_err)
+      endif
+
+      if (fdf_load_locate(label, mark)) then
+        if (tokens(mark%pline, 1) == "load" ) then
+          if (ntokens(mark%pline) < 3) then
+              fdf_load_filename = ""
+              if (fdf_output) write(fdf_out,'(a,5x,a)') label, &
+              "#  *** Set to empty string *** "
+          else
+              ! Get all the characters spanning the space from the second to
+              ! the last token
+              fdf_load_filename = characters(mark%pline, ind_init=3, ind_final=-1)
+              if (fdf_output) write(fdf_out,'(a,5x,a)') label, fdf_load_filename
+          endif
+        else
+          call die('FDF module: fdf_load_filename', 'Incorrect load statement', THIS_FILE, __LINE__, fdf_err)
+        endif          
+      else
+        fdf_load_filename = default
+        if (fdf_output) write(fdf_out,'(a,5x,a,5x,a)') label, default, '# default value'
+      endif
+
+      if (PRESENT(line)) line = mark
+
+      RETURN
+!--------------------------------------------------------------------------- END
+    END FUNCTION fdf_load_filename
+
+
+
+!
 !   Returns true if label 'label' appears by itself or in the form
 !   label {yes,true,.true.,t,y,1} (case insensitive).
 !
@@ -2631,6 +2940,53 @@ CONTAINS
       RETURN
 !--------------------------------------------------------------------------- END
     END FUNCTION fdf_locate
+
+
+!
+!   Searches for label in the fdf hierarchy. If it appears the function
+!   returns .TRUE. and leaves mark pointer positioned at the line.
+!   Otherwise, it returns .FALSE. and mark points to NULL.
+!
+    FUNCTION fdf_load_locate(label, mark)
+      implicit none
+!--------------------------------------------------------------- Input Variables
+      character(*)              :: label
+
+!-------------------------------------------------------------- Output Variables
+      logical                   :: fdf_load_locate
+      type(line_dlist), pointer :: mark
+
+!--------------------------------------------------------------- Local Variables
+      character(80)             :: strlabel
+
+!------------------------------------------------------------------------- BEGIN
+      fdf_load_locate = .FALSE.
+
+!      if (fdf_donothing) return
+
+      mark => file_in%first
+      do while ((.not. fdf_load_locate) .and. (ASSOCIATED(mark)))
+
+        if (match(mark%pline, 'l')) then
+          strlabel = tokens(mark%pline, 2)
+
+          if (labeleq(strlabel, label, fdf_log)) then
+            fdf_load_locate = .TRUE.
+          else
+            mark => mark%next
+          endif
+        else
+          mark => mark%next
+        endif
+      enddo
+
+      if (.not. fdf_load_locate) NULLIFY(mark)
+
+      RETURN
+!--------------------------------------------------------------------------- END
+    END FUNCTION fdf_load_locate
+
+
 
 !
 !   Returns true or false whether or not the label 'label' is
