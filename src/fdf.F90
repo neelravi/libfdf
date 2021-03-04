@@ -2272,7 +2272,7 @@ CONTAINS
     END FUNCTION fdf_string
 
 !
-!   Returns a string containing the filename appearing after the label , or the default
+!   Returns the name of the file appearing after the label , or the default
 !   string if label is not found in the fdf file.
 !   Optionally can return a pointer to the line found.
 !
@@ -2305,7 +2305,7 @@ CONTAINS
           else
               ! Get all the characters spanning the space from the second to
               ! the last token
-              fdf_load_filename = characters(mark%pline, ind_init=3, ind_final=-1)
+              fdf_load_filename = trim(characters(mark%pline, ind_init=3, ind_final=-1))
               if (fdf_output) write(fdf_out,'(a,5x,a)') label, fdf_load_filename
           endif
         else
@@ -2321,6 +2321,58 @@ CONTAINS
       RETURN
 !--------------------------------------------------------------------------- END
     END FUNCTION fdf_load_filename
+
+
+!   Returns the name of the module appearing after the %module syntax , or the default
+!   module name if label is not found in the fdf file.
+!   Optionally can return a pointer to the line found.
+!
+    FUNCTION fdf_locate_module(label, default, line)
+      implicit none
+!--------------------------------------------------------------- Input Variables
+      character(*)                        :: label
+      character(*)                        :: default
+
+!-------------------------------------------------------------- Output Variables
+      character(80)                       :: fdf_locate_module
+      type(line_dlist), pointer, optional :: line
+
+!--------------------------------------------------------------- Local Variables
+      type(line_dlist), pointer           :: mark
+
+!------------------------------------------------------------------------- BEGIN
+!     Prevents using FDF routines without initialize
+      if (.not. fdf_started) then
+        call die('FDF module: fdf_locate_module', 'FDF subsystem not initialized', &
+                 THIS_FILE, __LINE__, fdf_err)
+      endif
+
+      if (fdf_load_locate(label, mark)) then
+        if (tokens(mark%pline, 1) == "load" ) then
+          if (ntokens(mark%pline) < 3) then
+              fdf_locate_module = ""
+              if (fdf_output) write(fdf_out,'(a,5x,a)') label, &
+              "#  *** Set to empty string *** "
+          else
+              ! Get all the characters spanning the space from the second to
+              ! the last token
+              fdf_locate_module = trim(characters(mark%pline, ind_init=3, ind_final=-1))
+              if (fdf_output) write(fdf_out,'(a,5x,a)') label, fdf_locate_module
+          endif
+        else
+          call die('FDF module: fdf_locate_module', 'Incorrect load statement', THIS_FILE, __LINE__, fdf_err)
+        endif          
+      else
+        fdf_locate_module = default
+        if (fdf_output) write(fdf_out,'(a,5x,a,5x,a)') label, default, '# default value'
+      endif
+
+      if (PRESENT(line)) line = mark
+
+      RETURN
+!--------------------------------------------------------------------------- END
+    END FUNCTION fdf_locate_module
+
 
 
 
