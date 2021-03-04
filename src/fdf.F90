@@ -113,7 +113,7 @@ MODULE fdf
   public :: fdf_getline
 
 ! Test if label is defined
-  public :: fdf_defined, fdf_isphysical, fdf_isblock
+  public :: fdf_defined, fdf_isphysical, fdf_isblock, fdf_load_defined
 
 ! Allow to overwrite things in the FDF
   public :: fdf_overwrite, fdf_removelabel, fdf_addline
@@ -3444,6 +3444,35 @@ CONTAINS
       RETURN
 !----------------------------------------------------------------------- END
     END FUNCTION fdf_defined
+
+!   Check if label is defined
+!
+    logical FUNCTION fdf_load_defined(label)
+      implicit none
+!--------------------------------------------------------------- Input Variables
+      character(*)              :: label
+
+!--------------------------------------------------------------- Local Variables
+      type(line_dlist), pointer :: mark
+
+!--------------------------------------------------------------------- BEGIN
+      ! First, check whether a single label exists:
+      fdf_load_defined = fdf_load_locate(label, mark)
+      if (.not. fdf_load_defined) then
+         ! Check whether there is a block with that label
+         fdf_load_defined = fdf_isblock(label)
+      endif
+      if ( fdf_output ) then
+        write(fdf_out,'(a,5x,l10)') '#:defined? ' // label, fdf_load_defined
+      endif
+
+      RETURN
+!----------------------------------------------------------------------- END
+    END FUNCTION fdf_load_defined
+
+
+
+
 
 !
 !   Output levels:
