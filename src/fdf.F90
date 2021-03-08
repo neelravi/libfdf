@@ -485,7 +485,7 @@ CONTAINS
       character(80)              :: msg
       character(len=MAX_LENGTH)  :: label, inc_file
       character(len=MAX_LENGTH*2):: line
-      integer(ip)                :: i, ierr, ntok, ind_less, nlstart
+      integer(ip)                :: i, ierr, ntok, ind_less, nlstart, nlend
       type(parsed_line), pointer :: pline
 
 !------------------------------------------------------------------------- BEGIN
@@ -511,7 +511,7 @@ CONTAINS
 !         %block directive
           ind_less = search('<', pline)
           if (search('%block', pline) .eq. 1) then
-
+            print*, "debug::library::  inside block construct "                        
 !           No label found in %block directive
             if (ntok .eq. 1) then
               write(msg,*) '%block label not found in ', TRIM(filein)
@@ -542,6 +542,7 @@ CONTAINS
                 nullify(pline) ! it is stored in line
 
                 nlstart = file_in%nlines
+!                print*, "debug:: nlstart ", nlstart
 
                 call fdf_read(inc_file, label)
 
@@ -588,6 +589,7 @@ CONTAINS
 
 !         %endblock directive
           elseif (search('%endblock', pline) .eq. 1) then
+            print*, "debug::library::  inside endblock construct "                        
 !           Check if %block exists before %endblock
             if (label .eq. ' ') then
               write(msg,*) 'Bad %endblock found in ', TRIM(filein)
@@ -611,6 +613,38 @@ CONTAINS
               label = ' '
             endif
 
+!         %module construction            
+          elseif (search('%module', pline) .eq. 1) then
+!            label = tokens(pline, 2)            
+            print*, "debug::library::  inside module construct ", label
+!           No label found in %module directive
+            if (ntok .eq. 1) then
+              write(msg,*) '%module label not found in ', TRIM(filein)
+              call die('FDF module: fdf_read', msg,                     &
+                        THIS_FILE, __LINE__, fdf_err)
+            endif
+              
+! !           Add begin, body and end sections of module
+!           %module Label                     
+!              call destroy(pline)
+              line = '%module ' // label  
+              nlstart = file_in%nlines
+              print*, "debug:: beginning line no in the input file ", nlstart
+
+!             structure created          
+            
+!          %endmodule directive
+          elseif (search('%endmodule', pline) .eq. 1) then
+            print*, "debug::library::  inside endmodule construct "            
+!           Check if %module exists before %endmodule
+!              call destroy(pline)
+              line = '%endmodule ' // label
+              nlend = file_in%nlines
+              print*, "debug:: ending line no in the input file ", nlend
+              
+
+! custom added part ends here
+
 !         %include Filename directive
           elseif (search('%include', pline) .eq. 1) then
 !           Check if include filename is specified
@@ -625,29 +659,7 @@ CONTAINS
 
             ! Clean pline (we simply insert the next file)
             call destroy(pline)
-
-! !         %load Filename directive
-!           elseif (search('%load', pline) .eq. 1) then
-! !           Check if load filename is specified
-!             if (ntok .eq. 1) then
-!               write(msg,*) 'Filename on %load not found in ', TRIM(filein)
-!               call die('FDF module: fdf_read_custom', msg,                     &
-!                        THIS_FILE, __LINE__, fdf_err)
-!             else
-!               label = tokens(pline, 2)              
-!               inc_file = tokens(pline, 3)
-!               !call fdf_read(inc_file)
-!               line = '%load ' // trim(label) // ' ' // trim(inc_file)
-!               pline => digest(line)
-!               call setmorphol(1, 'b', pline)
-!               call setmorphol(2, 'l', pline)
-!               call setmorphol(3, 'l', pline)              
-!               call fdf_addtoken(line, pline)
-!               nullify(pline) ! it is stored in line
-!             endif             
-! ! Clean pline (we simply insert the next file)
-!             call destroy(pline)
-           
+          
 
 !         Label1 Label2 ... < Filename directive
           elseif (ind_less .ne. -1) then
