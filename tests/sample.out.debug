@@ -55,10 +55,11 @@
  Ntokens:           2
    Token:%endblock(e)
    Token:AtomicCoordinatesAndAtomicSpecies(l)
- Line:%block Atomic-Info
- Ntokens:           2
+ Line:%block Atomic-Info Coords.dat
+ Ntokens:           3
    Token:%block(b)
    Token:Atomic-Info(l)
+   Token:Coords.dat(n)
  Line: 0.333000  0.000000  0.000000
  Ntokens:           3
    Token:0.333000(r)
