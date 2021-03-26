@@ -266,6 +266,7 @@ MODULE fdf
   type, public :: block_fdf
     character(len=MAX_LENGTH) :: label
     type(line_dlist), pointer :: mark => null()
+    character(len=MAX_LENGTH) :: modulename = ""  
   end type block_fdf
 
 ! Dynamic list for parsed_line structures
@@ -483,15 +484,15 @@ CONTAINS
       logical                    :: dump
       logical, allocatable       :: found(:)
       character(80)              :: msg
-      character(len=MAX_LENGTH)  :: label, inc_file
+      character(len=MAX_LENGTH)  :: label, inc_file, modulename
       character(len=MAX_LENGTH*2):: line
-      integer(ip)                :: i, ierr, ntok, ind_less, nlstart, nlend
+      integer(ip)                :: i, ierr, ntok, ind_less, nlstart, nlend, counter
       type(parsed_line), pointer :: pline
 
 !------------------------------------------------------------------------- BEGIN
 !     Open reading input file
       call fdf_open(filein)
-
+      counter = 0
 !     Read each input data line
       if (PRESENT(blocklabel)) then
         label = blocklabel
@@ -511,7 +512,7 @@ CONTAINS
 !         %block directive
           ind_less = search('<', pline)
           if (search('%block', pline) .eq. 1) then
-            print*, "debug::library::  inside block construct "                        
+!            print*, "debug::library::  inside block construct "                        
 !           No label found in %block directive
             if (ntok .eq. 1) then
               write(msg,*) '%block label not found in ', TRIM(filein)
@@ -589,7 +590,7 @@ CONTAINS
 
 !         %endblock directive
           elseif (search('%endblock', pline) .eq. 1) then
-            print*, "debug::library::  inside endblock construct "                        
+!            print*, "debug::library::  inside endblock construct "                        
 !           Check if %block exists before %endblock
             if (label .eq. ' ') then
               write(msg,*) 'Bad %endblock found in ', TRIM(filein)
@@ -615,8 +616,17 @@ CONTAINS
 
 !         %module construction            
           elseif (search('%module', pline) .eq. 1) then
-!            label = tokens(pline, 2)            
-            print*, "debug::library::  inside module construct ", label
+            counter = counter + 1 
+            pline => digest(line)            
+!            print*, "debug::library::  inside module construct ", pline%line
+            call setmorphol(1, 'b', pline)
+            call setmorphol(2, 'l', pline)            
+            call fdf_addtoken(line, pline)    
+            nullify(pline) ! it is stored in line
+            nlstart = file_in%nlines
+            modulename = trim(line(8:))
+            write(*,'(A,1x,i1,1x,A)') "Module #", counter , trim(line(8:))
+            nullify(pline) ! it is stored in line            
 !           No label found in %module directive
             if (ntok .eq. 1) then
               write(msg,*) '%module label not found in ', TRIM(filein)
@@ -628,19 +638,19 @@ CONTAINS
 !           %module Label                     
 !              call destroy(pline)
               line = '%module ' // label  
-              nlstart = file_in%nlines
-              print*, "debug:: beginning line no in the input file ", nlstart
+              !nlstart = file_in%nlines
+!              print*, "debug:: beginning line no in the input file ", nlstart
 
 !             structure created          
             
 !          %endmodule directive
           elseif (search('%endmodule', pline) .eq. 1) then
-            print*, "debug::library::  inside endmodule construct "            
+!            print*, "debug::library::  inside endmodule construct "            
 !           Check if %module exists before %endmodule
 !              call destroy(pline)
-              line = '%endmodule ' // label
+              line = '%endmodule ' // label              
               nlend = file_in%nlines
-              print*, "debug:: ending line no in the input file ", nlend
+!              print*, "debug:: ending line no in the input file ", nlend
               
 
 ! custom added part ends here

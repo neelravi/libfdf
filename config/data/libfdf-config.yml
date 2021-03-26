@@ -1,0 +1,35 @@
+%YAML 1.2
+---
+timestamp: "20210326T015251+0100"
+
+info:
+    version: "0.2.2"
+
+target:
+    cpu: "x86_64"
+    vendor: "pc"
+    os: "linux-gnu"
+
+compilers:
+    CPP: "icc -E"
+    CPPFLAGS: ""
+    CC: "icc"
+    CFLAGS: "-g -O3 -feliminate-unused-debug-types -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -m64 -fasynchronous-unwind-tables -Wp,-D_REENTRANT -ftree-loop-distribute-patterns -Wl,-z -Wl,now -Wl,-z -Wl,relro -fno-semantic-interposition -ffat-lto-objects -fno-trapping-math -Wl,-sort-common -Wl,--enable-new-dtags -mtune=skylake -Wa,-mbranches-within-32B-boundaries"
+    FC: "ifort"
+    FCFLAGS: "-g -O3 -feliminate-unused-debug-types -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -m64 -fasynchronous-unwind-tables -Wp,-D_REENTRANT -ftree-loop-distribute-patterns -Wl,-z -Wl,now -Wl,-z -Wl,relro -malign-data=abi -fno-semantic-interposition -ftree-vectorize -ftree-loop-vectorize -Wl,-sort-common -Wl,--enable-new-dtags "
+    LDFLAGS: ""
+    LIBS: ""
+
+defaults:
+    debug_enable: "no"
+
+options:
+    enable_debug: ""
+
+triggers:
+    debug_enable: "no"
+
+inits:
+    debug: "def"
+
+...

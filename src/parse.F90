@@ -1346,6 +1346,29 @@ MODULE parse
 !------------------------------------------------------------- END
     END FUNCTION blocks
 
+
+
+!     FUNCTION modules(pline)
+!       implicit none
+! !------------------------------------------------- Input Variables
+!       type(parsed_line), pointer    :: pline
+
+! !------------------------------------------------ Output Variables
+!       character(len=MAX_LENGTH)     :: modulenames
+
+! !----------------------------------------------------------- BEGIN
+!       if (match(pline, 'bl')) then
+!         modulenames = trim(pline%line)(8:)
+!       else
+!         modulenames = ' '
+!       endif
+
+!       RETURN
+! !------------------------------------------------------------- END
+!     END FUNCTION modules
+
+
+
 !
 !   Return a given endblock label if it is found, else returns ''
 !   Syntax must be: '%endblock Label' (el) as stored in fdf structure
@@ -1430,6 +1453,45 @@ MODULE parse
       RETURN
 !------------------------------------------------------------- END
     END FUNCTION tokens
+
+!
+!   Return a given token as character, specifying it by its sequence
+!   number. It is also possible to make the sequence start after
+!   a given token number in the line.
+!
+!     FUNCTION modulenames(pline, ind, after)
+!       implicit none
+! !------------------------------------------------- Input Variables
+!       integer(ip), intent(in)           :: ind
+!       integer(ip), intent(in), optional :: after
+!       type(parsed_line), pointer        :: pline
+
+! !------------------------------------------------ Output Variables
+!       character(len=MAX_LENGTH)         :: tokens
+
+! !------------------------------------------------- Local Variables
+!       integer(ip)                       :: starting_pos, loc
+
+! !----------------------------------------------------------- BEGIN
+!       if (PRESENT(after)) then
+!         if ((after .lt. 0) .or. (after .ge. pline%ntokens)) &
+!           call die('PARSE module: tokens', 'Wrong starting position', &
+!                    THIS_FILE, __LINE__,cline=characters(pline,1,-1))
+!         starting_pos = after
+!       else
+!         starting_pos = 0
+!       endif
+
+!       if (starting_pos+ind .gt. pline%ntokens) &
+!         call die('PARSE module: tokens', 'Wrong starting position', &
+!                  THIS_FILE, __LINE__,cline=characters(pline,1,-1))
+
+!       loc = starting_pos+ind
+!       modulenames = pline%line(pline%first(loc):pline%last(loc))
+
+!       RETURN
+! !------------------------------------------------------------- END
+!     END FUNCTION modulenames
 
 !
 !   Return a piece of the input line, given specifying it by the sequence
